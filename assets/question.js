@@ -26,18 +26,24 @@ const question = [
   },
   {
     type: 'input',
-    name: 'TimeRange',
-    message: '请输入车次时间段（如：0-24或者9-12）',
-    default: '0-24',
+    name: 'TrainName',
+    message: '请输入车次信息（如：C7223或者C7223|C7201，多车次以“|”分隔）',
     validate (val) {
-      const reg = /^\d{1,2}-\d{1,2}$/
-      return reg.test(val) || '车次时间段格式不对'
+      return !!val || '车次信息不能为空'
     }
   },
   {
     type: 'input',
     name: 'SeatType',
     message: '请输入座位类型（如：二等座或者一等座|二等座，多类型以“|”分隔）'
+  },
+  {
+    type: 'input',
+    name: 'SCKEY',
+    message: '请输入有效SCKEY（如有不懂可阅读README.md文件）',
+    validate (val) {
+      return !!val || 'SCKEY不能为空'
+    }
   },
 ]
 

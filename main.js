@@ -19,32 +19,32 @@ fs.readFile('./assets/config.json', async (err, data) => {
   } else {
     config = JSON.parse(data)
   }
-  console.log(`查询任务：${config.DepartDate} ${config.TimeRange}点 ${config.DepartStation}至${config.ArriveStation}的${config.SeatType}有票车次`)
+  console.log(`查询任务：${config.DepartDate} ${config.TrainName} ${config.DepartStation}至${config.ArriveStation}的${config.SeatType}有票车次`)
   ticketSchedule()
 })
 
 // 初始化
-async function init({ DepartStation, ArriveStation, DepartDate, TimeRange, SeatType }) {
+async function init({ DepartStation, ArriveStation, DepartDate, TrainName, SeatType, SCKEY }) {
   // 获取火车票数据
   const ticketData = await api.post(url.ticketList, {
     DepartStation,
     ArriveStation,
     DepartDate
   })
-  const list = ticketData.ResponseBody.TrainItems
-  const timeRangeArr = TimeRange.split('-')
-  let desp = `以下为${DepartDate} ${TimeRange}点 ${DepartStation}至${ArriveStation}的${SeatType}有票车次：` // 消息内容
+  const list = ticketData.ResponseBody.TrainItems || []
+  let desp = `以下为${DepartDate} ${TrainName} ${DepartStation}至${ArriveStation}的${SeatType}有票车次：` // 消息内容
   list.forEach(item => {
+    // 车次信息判断
+    if (!TrainName.toLowerCase().includes(item.TrainName.toLowerCase())) return
+    // 是否可预订
     if (item.Bookable) {
       let showTitle = true
-      let startTime = +item.StartTime.slice(0, 2)
-      // 出发时间是否在区间内
-      if (startTime < timeRangeArr[0] || startTime >= timeRangeArr[1]) return
       item.TicketResult.TicketItems.forEach(ticket => {
+        // 余票及座位类型判断
         if (ticket.Inventory > 0 && (!SeatType || SeatType.includes(ticket.SeatTypeName))) {
           if (showTitle) {
-            console.log(`${DepartDate} ${item.StartTime}有票：`)
-            desp += `\n\n${DepartDate} ${item.StartTime}：`
+            console.log(`${DepartDate} ${item.StartTime} ${item.TrainName}有票：`)
+            desp += `\n\n${DepartDate} ${item.StartTime} ${item.TrainName}：`
           }
           console.log(`${ticket.SeatTypeName}：${ticket.Inventory}`)
           desp += `${ticket.SeatTypeName}：${ticket.Inventory}，`
@@ -58,12 +58,13 @@ async function init({ DepartStation, ArriveStation, DepartDate, TimeRange, SeatT
   })
   if (hasTicket) {
     console.log('查找成功')
-    // 标题
+    // 微信通知推送
+    const wxUrl = `https://sc.ftqq.com/${SCKEY}.send`
     const reqData = {
       text: '主人我找到啦，快点进来',
       desp
     }
-    const resData = await api.post(url.wxSend, qs.stringify(reqData))
+    const resData = await api.post(wxUrl, qs.stringify(reqData))
     resData.errno === 0 && console.log('微信通知成功')
   } else {
     console.log('无票')

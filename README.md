@@ -7,3 +7,6 @@
   * 在当前文件夹运行终端``` npm install ```安装依赖
   * ```node main.js``` 第一次运行会要求输入信息并且存入./assets/config.json，以后再次运行只会读取config.json中的数据，不会要求再次输入。
   * ```node main.js -r``` 可以重写config.json(重新输入信息)。
+
+## 注意
+  * SCKEY使用的是[Server酱](http://sc.ftqq.com/3.version)，可使用Server酱获取。
