@@ -3,19 +3,18 @@ const qs = require("querystring")
 const fs = require('fs')
 const schedule = require('node-schedule')
 const inquirer = require('inquirer')
-const question = require('./question')
+const question = require('./assets/question')
 const SCKEY = 'SCU65034T1c2cc6c083aecfa5c3b42f351f8a62f55db2cfb906692'
 let config = {}
-let isReWrite = checkArgv(process.argv, '-r') // node index.js -r
+let isReWrite = checkArgv(process.argv, '-r') // node main.js -r
 let times = 0 // 记录请求的次数
 let hasTicket = false // 是否有票
 
 // 读取配置文件
-fs.readFile('./config.json', async (err, data) => {
+fs.readFile('./assets/config.json', async (err, data) => {
   if (err || !data || isReWrite) {
     config = await inquirer.prompt(question)
-    console.log('rewrite:', isReWrite)
-    fs.writeFileSync('config.json', JSON.stringify(config))
+    fs.writeFileSync('./assets/config.json', JSON.stringify(config))
   } else {
     config = JSON.parse(data)
   }
